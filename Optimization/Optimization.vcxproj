@@ -74,6 +74,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>$(ProjectDir)lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -92,9 +94,10 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies />
-      <SubSystem>Windows</SubSystem>
-      <EntryPointSymbol>main</EntryPointSymbol>
+      <AdditionalDependencies>libfl.a;</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -138,14 +141,22 @@
   <ItemGroup>
     <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="DotNetUitilities.cpp" />
+    <ClCompile Include="FunctionDef.cpp" />
+    <ClCompile Include="gss.cpp" />
+    <ClCompile Include="HelperFunctions.cpp" />
     <ClCompile Include="MyForm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="DotNetUtilities.h" />
+    <ClInclude Include="FunctionDef.h" />
+    <ClInclude Include="FormTok.h" />
+    <ClInclude Include="HelperFunctions.h" />
+    <ClInclude Include="lex.h" />
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="VarBox.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MyForm.resx">

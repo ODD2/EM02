@@ -1,4 +1,7 @@
 #include "DataManager.h"
+#include <iostream>
+
+
 
 DataManager::DataManager()
 {
@@ -42,5 +45,6 @@ std::vector<std::string> DataManager::GetEquations()
 
 void DataManager::SetFileName(std::string fileName)
 {
+	
 	FileName = fileName;
 }

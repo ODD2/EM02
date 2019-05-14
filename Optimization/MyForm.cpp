@@ -3,7 +3,7 @@
 using namespace System;
 using namespace System::Windows::Forms;
 [STAThread]
-int main(array<String^>^ argv)
+int main(/*array<String^>^ argv*/ int,char**)
 {
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);

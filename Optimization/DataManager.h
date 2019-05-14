@@ -1,9 +1,11 @@
 #pragma once
 #include<vector>
+#include <map>
 #include<iostream>
 #include<fstream>
 #include<string>
-
+#include "VarBox.h"
+using namespace std;
 
 //定義控管資料class
 class DataManager
@@ -15,7 +17,10 @@ private:
 	int EquationIndex;
 	//紀錄檔案路徑名稱
 	std::string FileName;
+
 public:
+
+	
 	DataManager();
 	//讀取向量資料
 	bool LoadEquationData();
