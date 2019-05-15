@@ -8,6 +8,8 @@
 #include "HelperFunctions.h"
 #include "lex.h"
 #include "FunctionDef.h"
+#include "PowellMinimizer.h"
+#include "SteepestMinimizer.h"
 
 namespace Optimization {
 	using namespace System;
@@ -317,8 +319,9 @@ namespace Optimization {
 					Infix2Postfix(*(Function->GetFmu()));
 
 					Function->CreateTokenLink();
-					
+#ifdef OD_PRINT_PROCESS
 					cout << Function->CalcFuncWithVar();
+#endif
 					Output->Text =gcnew String(Function->toString().c_str());
 				}
 				else if (CmdBlock[0] == "InitP") {
@@ -329,7 +332,9 @@ namespace Optimization {
 						Values.push_back(Convert::ToDouble(CmdBlock[i]));
 					}
 					Function->setVariables(Values);
+#ifdef OD_PRINT_PROCESS
 					cout << Function->CalcFuncWithVar();
+#endif
 					Output->Text = gcnew String(Function->toString().c_str());
 				}
 				else if (CmdBlock[0] == "Limits") {
@@ -342,18 +347,45 @@ namespace Optimization {
 						Values[var] = { low,high };
 					}
 					Function->setLimits(Values);
-					cout << Function->CalcFuncWithVar();
 					Output->Text = gcnew String(Function->toString().c_str());
+				}
+				else if (CmdBlock[0] == "Powell") {
+					PowellMinimizer Pm(Function);
+					Vector Point =  Pm.Find();
+					Output->Text += Vector2String(Point)+"\r\n";
+					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+				}
+				else if (CmdBlock[0] == "Steep") {
+					SteepestMinimizer Sm(Function);
+					Vector Point = Sm.Find();
+					Output->Text += Vector2String(Point) + "\r\n";
+					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+				}
+				else if (CmdBlock[0] == "Test") {
+					Output->Text += Vector2String((*Function).Gradient()) + "\r\n";
 				}
 				else {
 					History->AppendText("No Such Command!!");
 				}
 			}
-
 			//Record Into History.
 			History->AppendText(Input->Text);
 			Input->Text = "";
 		}
     }
+	
+
+	private: System::String ^ Vector2String(const Vector & v) {
+		String ^ ret = gcnew String("");
+		ret += "[ ";
+		for (int i = 0,j = v.dim(); i < j; ++i) {
+			ret += v[i].ToString();
+			if (i != j - 1) {
+				ret += " , ";
+			}
+		}
+		ret += " ]";
+		return ret;
+	}
 };
 }

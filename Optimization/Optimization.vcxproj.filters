@@ -33,6 +33,18 @@
     <ClCompile Include="FunctionDef.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="Matrix.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="PowellMinimizer.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="SteepestMinimizer.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyForm.h">
@@ -58,6 +70,21 @@
     </ClInclude>
     <ClInclude Include="FormTok.h">
       <Filter>原始程式檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="PowellMinimizer.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="odflags.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="SteepestMinimizer.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
