@@ -10,6 +10,10 @@
 #include "FunctionDef.h"
 #include "PowellMinimizer.h"
 #include "SteepestMinimizer.h"
+#include "NewtonMinimizer.h"
+#include "QuasiNewtonMinimizer.h"
+#include "ConjugateGradientMinimizer.h"
+#include "Recorder.h"
 
 namespace Optimization {
 	using namespace System;
@@ -50,15 +54,23 @@ namespace Optimization {
 
 	private: System::Windows::Forms::Panel^  panel2;
 	private: System::Windows::Forms::Panel^  panel3;
-	private: System::Windows::Forms::Panel^  panel4;
+
 	private: System::Windows::Forms::TextBox^  History;
-	private: System::Windows::Forms::Label^  HistorytText;
+
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog1;
 
+	private: System::Windows::Forms::Keys PressedKey;
 	protected:
 		/// <summary>
 		DataManager* dataManager;
-		FunctionDef * Function;
+	private: System::Windows::Forms::TabControl^  tabControl1;
+	protected:
+	private: System::Windows::Forms::TabPage^  tabPage1;
+	private: System::Windows::Forms::TabPage^  tabPage2;
+
+	private: System::Windows::Forms::TextBox^  Process;
+
+			 FunctionDef * Function;
 		/// 清除任何使用中的資源。
 		/// </summary>
 		~MyForm()
@@ -93,15 +105,19 @@ namespace Optimization {
 			this->OutputText = (gcnew System::Windows::Forms::Label());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
-			this->panel4 = (gcnew System::Windows::Forms::Panel());
 			this->History = (gcnew System::Windows::Forms::TextBox());
-			this->HistorytText = (gcnew System::Windows::Forms::Label());
 			this->openFileDialog1 = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->tabControl1 = (gcnew System::Windows::Forms::TabControl());
+			this->tabPage1 = (gcnew System::Windows::Forms::TabPage());
+			this->tabPage2 = (gcnew System::Windows::Forms::TabPage());
+			this->Process = (gcnew System::Windows::Forms::TextBox());
 			this->panel1->SuspendLayout();
 			this->menuStrip1->SuspendLayout();
 			this->panel2->SuspendLayout();
 			this->panel3->SuspendLayout();
-			this->panel4->SuspendLayout();
+			this->tabControl1->SuspendLayout();
+			this->tabPage1->SuspendLayout();
+			this->tabPage2->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// panel1
@@ -141,13 +157,14 @@ namespace Optimization {
 			// 
 			// Input
 			// 
-			this->Input->Location = System::Drawing::Point(6, 19);
+			this->Input->Location = System::Drawing::Point(14, 19);
 			this->Input->Multiline = true;
 			this->Input->Name = L"Input";
 			this->Input->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-			this->Input->Size = System::Drawing::Size(328, 47);
+			this->Input->Size = System::Drawing::Size(313, 294);
 			this->Input->TabIndex = 1;
 			this->Input->TextChanged += gcnew System::EventHandler(this, &MyForm::Input_TextChanged);
+			this->Input->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &MyForm::Input_KeyDown);
 			// 
 			// InputText
 			// 
@@ -160,12 +177,12 @@ namespace Optimization {
 			// 
 			// Output
 			// 
-			this->Output->Location = System::Drawing::Point(6, 18);
+			this->Output->Location = System::Drawing::Point(14, 18);
 			this->Output->Multiline = true;
 			this->Output->Name = L"Output";
 			this->Output->ReadOnly = true;
 			this->Output->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-			this->Output->Size = System::Drawing::Size(328, 216);
+			this->Output->Size = System::Drawing::Size(313, 352);
 			this->Output->TabIndex = 3;
 			// 
 			// OutputText
@@ -181,58 +198,83 @@ namespace Optimization {
 			// 
 			this->panel2->Controls->Add(this->InputText);
 			this->panel2->Controls->Add(this->Input);
-			this->panel2->Location = System::Drawing::Point(322, 32);
+			this->panel2->Location = System::Drawing::Point(528, 36);
 			this->panel2->Name = L"panel2";
-			this->panel2->Size = System::Drawing::Size(334, 75);
+			this->panel2->Size = System::Drawing::Size(334, 316);
 			this->panel2->TabIndex = 5;
 			// 
 			// panel3
 			// 
 			this->panel3->Controls->Add(this->OutputText);
 			this->panel3->Controls->Add(this->Output);
-			this->panel3->Location = System::Drawing::Point(322, 113);
+			this->panel3->Location = System::Drawing::Point(528, 358);
 			this->panel3->Name = L"panel3";
-			this->panel3->Size = System::Drawing::Size(334, 237);
+			this->panel3->Size = System::Drawing::Size(334, 387);
 			this->panel3->TabIndex = 6;
-			// 
-			// panel4
-			// 
-			this->panel4->Controls->Add(this->History);
-			this->panel4->Controls->Add(this->HistorytText);
-			this->panel4->Location = System::Drawing::Point(12, 36);
-			this->panel4->Name = L"panel4";
-			this->panel4->Size = System::Drawing::Size(304, 690);
-			this->panel4->TabIndex = 7;
 			// 
 			// History
 			// 
-			this->History->Location = System::Drawing::Point(3, 18);
+			this->History->Location = System::Drawing::Point(-4, 0);
 			this->History->Multiline = true;
 			this->History->Name = L"History";
 			this->History->ReadOnly = true;
 			this->History->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-			this->History->Size = System::Drawing::Size(298, 669);
+			this->History->Size = System::Drawing::Size(506, 688);
 			this->History->TabIndex = 1;
-			// 
-			// HistorytText
-			// 
-			this->HistorytText->AutoSize = true;
-			this->HistorytText->Location = System::Drawing::Point(3, 0);
-			this->HistorytText->Name = L"HistorytText";
-			this->HistorytText->Size = System::Drawing::Size(49, 15);
-			this->HistorytText->TabIndex = 0;
-			this->HistorytText->Text = L"History";
+			this->History->Text = L" ";
 			// 
 			// openFileDialog1
 			// 
 			this->openFileDialog1->FileName = L"openFileDialog1";
 			// 
+			// tabControl1
+			// 
+			this->tabControl1->Controls->Add(this->tabPage1);
+			this->tabControl1->Controls->Add(this->tabPage2);
+			this->tabControl1->Location = System::Drawing::Point(12, 36);
+			this->tabControl1->Name = L"tabControl1";
+			this->tabControl1->SelectedIndex = 0;
+			this->tabControl1->Size = System::Drawing::Size(510, 713);
+			this->tabControl1->TabIndex = 8;
+			// 
+			// tabPage1
+			// 
+			this->tabPage1->Controls->Add(this->History);
+			this->tabPage1->Location = System::Drawing::Point(4, 25);
+			this->tabPage1->Name = L"tabPage1";
+			this->tabPage1->Padding = System::Windows::Forms::Padding(3);
+			this->tabPage1->Size = System::Drawing::Size(502, 684);
+			this->tabPage1->TabIndex = 0;
+			this->tabPage1->Text = L"History";
+			this->tabPage1->UseVisualStyleBackColor = true;
+			// 
+			// tabPage2
+			// 
+			this->tabPage2->Controls->Add(this->Process);
+			this->tabPage2->Location = System::Drawing::Point(4, 25);
+			this->tabPage2->Name = L"tabPage2";
+			this->tabPage2->Padding = System::Windows::Forms::Padding(3);
+			this->tabPage2->Size = System::Drawing::Size(502, 684);
+			this->tabPage2->TabIndex = 1;
+			this->tabPage2->Text = L"Process";
+			this->tabPage2->UseVisualStyleBackColor = true;
+			// 
+			// Process
+			// 
+			this->Process->Location = System::Drawing::Point(-4, 0);
+			this->Process->Multiline = true;
+			this->Process->Name = L"Process";
+			this->Process->ReadOnly = true;
+			this->Process->ScrollBars = System::Windows::Forms::ScrollBars::Both;
+			this->Process->Size = System::Drawing::Size(506, 688);
+			this->Process->TabIndex = 1;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(668, 738);
-			this->Controls->Add(this->panel4);
+			this->ClientSize = System::Drawing::Size(874, 771);
+			this->Controls->Add(this->tabControl1);
 			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
@@ -248,8 +290,11 @@ namespace Optimization {
 			this->panel2->PerformLayout();
 			this->panel3->ResumeLayout(false);
 			this->panel3->PerformLayout();
-			this->panel4->ResumeLayout(false);
-			this->panel4->PerformLayout();
+			this->tabControl1->ResumeLayout(false);
+			this->tabPage1->ResumeLayout(false);
+			this->tabPage1->PerformLayout();
+			this->tabPage2->ResumeLayout(false);
+			this->tabPage2->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -284,7 +329,7 @@ namespace Optimization {
 }
 			
     private: System::Void Input_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-		if (Input->TextLength > 0 &&  Input->Text[Input->TextLength - 1] == '\n') {
+		if (Input->TextLength > 0 && PressedKey == System::Windows::Forms::Keys::Enter &&  Input->Text[Input->TextLength - 1] == '\n') {
 			cli::array<String^> ^ deli = { "\r\n"};
 			cli::array<System::String^>^ userCommand = Input->Text->Split(deli, System::StringSplitOptions::None);
 			for (int i = 0; i < userCommand->Length - 1 ; ++i) {
@@ -354,18 +399,46 @@ namespace Optimization {
 					Vector Point =  Pm.Find();
 					Output->Text += Vector2String(Point)+"\r\n";
 					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+					Process->Text = gcnew String(Recorder::Record());
+					Recorder::Clear();
 				}
 				else if (CmdBlock[0] == "Steep") {
 					SteepestMinimizer Sm(Function);
 					Vector Point = Sm.Find();
 					Output->Text += Vector2String(Point) + "\r\n";
 					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+					Process->Text = gcnew String(Recorder::Record());
+					Recorder::Clear();
 				}
 				else if (CmdBlock[0] == "Test") {
 					Output->Text += Vector2String((*Function).Gradient()) + "\r\n";
 				}
+				else if (CmdBlock[0] == "Newton") {
+					NewtonMinimizer Nm(Function);
+					Vector Point = Nm.Find();
+					Output->Text += Vector2String(Point) + "\r\n";
+					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+					Process->Text = gcnew String(Recorder::Record());
+					Recorder::Clear();
+				}
+				else if (CmdBlock[0] == "QNewton") {
+					QuasiNewtonMinimizer QNm(Function);
+					Vector Point = QNm.Find();
+					Output->Text += Vector2String(Point) + "\r\n";
+					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+					Process->Text = gcnew String(Recorder::Record());
+					Recorder::Clear();
+				}
+				else if (CmdBlock[0] == "Conjugate") {
+					ConjugateGradientMinimizer CGm(Function);
+					Vector Point = CGm.Find();
+					Output->Text += Vector2String(Point) + "\r\n";
+					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+					Process->Text = gcnew String(Recorder::Record());
+					Recorder::Clear();
+				}
 				else {
-					History->AppendText("No Such Command!!");
+					History->AppendText("No Such Command!!\r\n");
 				}
 			}
 			//Record Into History.
@@ -386,6 +459,9 @@ namespace Optimization {
 		}
 		ret += " ]";
 		return ret;
+	}
+	private: System::Void Input_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+		PressedKey = e->KeyCode;
 	}
 };
 }

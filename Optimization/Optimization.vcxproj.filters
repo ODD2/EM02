@@ -45,6 +45,18 @@
     <ClCompile Include="SteepestMinimizer.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="NewtonMinimizer.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="QuasiNewtonMinimizer.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="ConjugateGradientMinimizer.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Recorder.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyForm.h">
@@ -84,6 +96,21 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="SteepestMinimizer.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="NewtonMinimizer.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="QuasiNewtonMinimizer.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalDefinitions.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="ConjugateGradientMinimizer.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Recorder.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

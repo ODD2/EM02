@@ -1,4 +1,5 @@
 #include "Vector.h"
+#include "Matrix.h"
 #include <stdarg.h>
 #include <exception>
 #include <math.h>
@@ -256,4 +257,15 @@ std::vector<Vector> gram_schmidt(Vector l, ...) {
 		ret[i] = nrmlz(ret[i]);
 	}
 	return ret;
+}
+
+Matrix Vector::toMatrix(const Vector & v)
+{
+	
+		Matrix ret(v.dim(), 1);
+		for (int i = 0; i < ret.rows; ++i) {
+			ret[i][0] = v[i];
+		}
+		return ret;
+	
 }

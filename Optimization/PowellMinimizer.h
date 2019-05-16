@@ -3,8 +3,7 @@
 #include "Vector.h"
 
 
-class PowellMinimizer
-{
+class PowellMinimizer{
 public:
 	PowellMinimizer(FunctionDef * Function);
 	unsigned int numArgs = 0;
@@ -13,6 +12,8 @@ public:
 private:
 	double GoldenSectionSearch(Vector & direction, Vector & basePoint);
 };
+
+double GoldentSectionSearch(FunctionDef& Function, Vector & direction);
 
 vector<double> operator*(double scale, const vector<double>& r);
 

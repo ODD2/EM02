@@ -40,6 +40,14 @@ Matrix::Matrix(const std::vector<Vector>& mat) {
 		cols = mat[0].dim();
 }
 
+Matrix::Matrix(const Vector & mat)
+	:Data(mat.dim()),cols(1),rows(mat.dim())
+{
+	for (int i = 0; i < rows; ++i) {
+		Data[i].Data.push_back(mat[i]);
+	}
+}
+
 //copy constructor
 Matrix::Matrix(const Matrix& mat) {
 	Data = mat.Data;
@@ -319,6 +327,53 @@ int rank(Matrix &m) {
 	return rk;
 }
 
+Matrix operator*(const Matrix & l, const Matrix & r)
+{
+	return multm(l, r);
+}
+Matrix operator*(const Matrix & l, double r)
+{
+	Matrix ret = l;
+	for (int i = 0; i < l.rows; ++i) {
+		for (int j = 0; j < l.cols; ++j) {
+			ret[i][j] *= r;
+		}
+	}
+	return ret;
+}
+Matrix operator*(double l, const Matrix & r)
+{
+	Matrix ret = r;
+	for (int i = 0; i < r.rows; ++i) {
+		for (int j = 0; j < r.cols; ++j) {
+			ret[i][j] *= l;
+		}
+	}
+	return ret;
+}
+Matrix operator*(const Matrix & l, const Vector & r)
+{
+	return multm(l, r);
+}
+Matrix operator+(const Matrix & l, const Matrix & r)
+{
+	return addm(l, r);
+}
+Matrix operator-(const Matrix & l, const Matrix & r)
+{
+	return Matrix();
+}
+Matrix operator/(const Matrix & l, double r)
+{
+	Matrix ret = l;
+	for (int i = 0; i < l.rows; ++i) {
+		for (int j = 0; j < l.cols; ++j) {
+			ret[i][j] /= r;
+		}
+	}
+	return ret;
+}
+
 int comp_1(const void * a,const  void * b) {
 	return ((std::pair<int, Vector>*)a)->first  -  ((std::pair<int, Vector>*)b)->first;
 }
@@ -587,6 +642,150 @@ std::vector<std::vector<std::string>> solve(const Matrix &l, const Matrix &r) {
 	}
 	return result;
 }
+
+Matrix solve0(const Matrix &l, const Matrix &r) {
+	int COLS = l.cols;
+	int ROWS = l.rows;
+	int ACOLS = r.cols;
+	int AROWS = r.rows;
+	if (ROWS != AROWS)CON_ERR
+
+		//Sort
+		std::vector<IVV> sorted;
+	for (int i = 0; i < ROWS; ++i) {
+		bool insert = false;
+		IVV entity; entity.second.first = l[i]; entity.second.second = r[i];
+		for (int j = 0; j < COLS; ++j) {
+			if (fabs(l[i][j]) > ZERO) {
+				entity.first = j;
+				for (int k = 0, lk = sorted.size(); k < lk; ++k) {
+					if (j < sorted[k].first) {
+						sorted.insert(sorted.begin() + k, std::move(entity));
+						insert = true;
+						break;
+					}
+				}
+				if (!insert) {
+					sorted.push_back(std::move(entity));
+					insert = true;
+				}
+				break;
+			}
+			else l[i][j] = 0;
+		}
+		if (!insert) {
+			entity.first = COLS;
+			sorted.push_back(std::move(entity));
+		}
+	}
+
+	//Elimination
+	int limit = ROWS < COLS ? ROWS : COLS;
+	for (int r = 0; r < limit; ++r) {
+
+		//Skipping leading zeros
+		Vector & rowVec = sorted[r].second.first;
+		Vector & ansVec = sorted[r].second.second;
+		int c = sorted[r].first;
+		if (c == COLS)break;
+
+		//Eliminate
+		for (int i_r = r + 1; i_r < ROWS; ++i_r) {
+			Vector & _rowVec = sorted[i_r].second.first;
+			Vector & _ansVec = sorted[i_r].second.second;
+
+			double multiplier = _rowVec[c] / rowVec[c];
+			if (multiplier == 0) {
+				//Afterward vectors  has larger equal leading zeros.
+				break;
+			}
+			bool leadZero = true;
+			for (int i_c = c; i_c < COLS; ++i_c) {
+				_rowVec[i_c] -= multiplier * rowVec[i_c];
+				//Deviation Removal
+				if (fabs(_rowVec[i_c]) < ZERO) {
+					_rowVec[i_c] = 0.0;
+					if (leadZero) sorted[i_r].first += 1;
+				}
+				else leadZero = false;
+			}
+			for (int i_c = 0; i_c < ACOLS; ++i_c) {
+				_ansVec[i_c] -= multiplier * ansVec[i_c];
+				//Deviation Removal
+				if (fabs(_ansVec[i_c]) < ZERO) {
+					_ansVec[i_c] = 0.0;
+				}
+			}
+		}
+
+		//Normalize
+		double divident = rowVec[c];
+		for (int i_c = c; i_c < COLS; ++i_c) {
+			rowVec[i_c] /= divident;
+		}
+		for (int i_c = 0; i_c < ACOLS; ++i_c) {
+			ansVec[i_c] /= divident;
+		}
+
+
+		//Sort
+		if (r + 1 != ROWS)	std::qsort(&sorted[r + 1], ROWS - 1 - r, sizeof(IVV), comp_1);
+	}
+
+	//CleanUp
+	for (int i_r = ROWS - 1; i_r >= 0; --i_r) {
+		if (sorted[i_r].first == COLS) continue;
+
+		Vector & rowVec = sorted[i_r].second.first;
+		Vector & ansVec = sorted[i_r].second.second;
+		int leading0 = sorted[i_r].first;
+
+		for (int i_rr = i_r - 1; i_rr >= 0; --i_rr) {
+			Vector & _rowVec = sorted[i_rr].second.first;
+			Vector & _ansVec = sorted[i_rr].second.second;
+			double multiplier = _rowVec[leading0];
+			//Deviation Removal & Multiplier Zero
+			if (fabs(multiplier) < ZERO) {
+				_rowVec[leading0] = 0;
+				continue;
+			}
+			for (int i_c = leading0; i_c < COLS; ++i_c) {
+				_rowVec[i_c] -= multiplier * rowVec[i_c];
+				//Deviation Removal
+				if (fabs(_rowVec[i_c]) < ZERO) {
+					_rowVec[i_c] = 0;
+				}
+			}
+			for (int i_c = 0; i_c < ACOLS; ++i_c) {
+				_ansVec[i_c] -= multiplier * ansVec[i_c];
+				//Deviation Removal
+				if (fabs(_ansVec[i_c]) < ZERO) {
+					_ansVec[i_c] = 0;
+				}
+			}
+		}
+	}
+
+	//Create Result
+	Matrix ret(l.cols, r.rows);
+	for (int c = 0; c < ACOLS; ++c) {
+		for (int r = 0; r < AROWS; ++r) {
+			Vector & reqVec = sorted[r].second.first;
+			double value = sorted[r].second.second[c];
+			if (sorted[r].first == COLS ) {
+				if ( value != 0) {
+					throw std::exception("Error Equation Cannot Solve");
+				}
+				else continue;
+			}
+			else {
+				ret[sorted[r].first][c] = value;
+			}
+		}
+	}
+	return ret;
+}
+
 
 //CAUTION!!! This Function Deals ONLY SQUARE Matrices.
 Matrix inverse( Matrix &l) {

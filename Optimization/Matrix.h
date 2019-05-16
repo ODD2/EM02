@@ -7,6 +7,7 @@ struct Matrix
 	Matrix(unsigned int rows, unsigned int cols);
 	Matrix(unsigned int rows, unsigned int cols,const std::vector<Vector>& Data);
 	Matrix(const std::vector<Vector>& mat);
+	Matrix(const Vector& mat);
 	Matrix(const Matrix& mat);
 	Matrix(Matrix&& mat);
 	Matrix operator=(const Matrix & mat);
@@ -14,7 +15,17 @@ struct Matrix
 	//ptrs
 	std::vector<Vector> * rref = nullptr;
 	std::vector<Vector> * inv = nullptr;
-
+	static Vector getVector(const Matrix&  mat,int index) {
+		if (index >= mat.cols)throw  std::exception("Out of Range!!");
+		else
+		{
+			Vector ret(mat.rows);
+			for (int i = 0; i < mat.rows; ++i) {
+				ret[i] = mat[i][index];
+			}
+			return ret;
+		}
+	}
 	//values
 	unsigned int rows;
 	unsigned int cols;
@@ -57,6 +68,7 @@ union MatFunc {
 
 Vector getEigenVector(Matrix &l);
 std::vector<std::vector<std::string>> solve(const Matrix &l, const Matrix &r);
+Matrix solve0(const Matrix &l, const Matrix &r);
 std::vector<Vector> eigenValue(Matrix &l);
 Matrix addm(const Matrix & l, const Matrix & r);
 Matrix subm(const Matrix & l, const Matrix & r);
@@ -67,10 +79,18 @@ Matrix powerMethod(const Matrix &l);
 Matrix leastsquare(Matrix &l, Matrix &r);
 Matrix guass(Matrix &l);
 Matrix inverse(Matrix &l);
-Matrix adjoint(Matrix &l); 
+Matrix adjoint(Matrix &l);
 double determ(Matrix &l);
 bool independent(Matrix &m);
 int rank(Matrix &m);
+
+Matrix operator *(const Matrix &l, const Matrix&r);
+Matrix operator *(const Matrix &l, const Vector&r);
+Matrix operator*(const Matrix & l, double r);
+Matrix operator*(double l, const Matrix & r);
+Matrix operator +(const Matrix &l, const Matrix&r);
+Matrix operator -(const Matrix &l, const Matrix&r);
+Matrix operator /(const Matrix &l, double r);
 
 
 

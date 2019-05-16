@@ -7,10 +7,11 @@
 #include "FormTok.h"
 #include "HelperFunctions.h"
 #include "odflags.h"
+#include "GlobalDefinitions.h"
+#include "Recorder.h"
 #include "Vector.h"
 #include "Matrix.h"
 using namespace std;
-#define _EPSILON 0.000000001
 #define H 0.001
 class FunctionDef
 {
@@ -54,7 +55,7 @@ public:
 		return ret;
 	}
 
-	double setVariables(vector<double>& args) {
+	void setVariables(vector<double>& args) {
 		int index = 0;
 		for (auto it = FuncVar->begin(); it != FuncVar->end(); ++it) {
 #ifdef OD_EXCEP_ON
@@ -71,7 +72,16 @@ public:
 			it->second.value = args[index];
 			++index;
 		}
-		return 0;
+	}
+	void setVariables(Vector& args) {
+		try
+		{
+			setVariables(args.Data);
+		}
+		catch (...)
+		{
+			throw;
+		}
 	}
 	double setLimits(map<string,pair<double,double>>& limits) {
 		for (auto it = limits.begin(); it != limits.end(); ++it) {

@@ -2,6 +2,7 @@
 #include<vector>
 #include<string>
 #include <map>
+class Matrix;
 //定義向量資料結構
 struct Vector
 {
@@ -17,6 +18,8 @@ struct Vector
 
 	Vector(std::vector<double> v) :Data(v) {
 	}
+
+	static Matrix toMatrix(const Vector & v);
 
 
 	const unsigned int dim() const {
