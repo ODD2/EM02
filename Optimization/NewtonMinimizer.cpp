@@ -21,8 +21,9 @@ Vector NewtonMinimizer::Find()
 		{
 			basePoint = destPoint;
 			Hessein = Function.Heissen();
-			move = Matrix::getVector(solve0(Hessein, -1 * Function.Gradient()), 0);
-			value = Function(destPoint + move);
+			//if(lengthm(Hessein))
+			move = 0.95*Matrix::getVector(solve0(Hessein, -1 * Function.Gradient()), 0);
+			value = Function(basePoint + move);
 			destPoint = Function.GetInitPv();
 #ifdef OD_RECORD
 			{

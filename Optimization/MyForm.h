@@ -437,6 +437,7 @@ namespace Optimization {
 					Process->Text = gcnew String(Recorder::Record());
 					Recorder::Clear();
 				}
+				else if (CmdBlock[0] == "//");
 				else {
 					History->AppendText("No Such Command!!\r\n");
 				}
@@ -447,12 +448,14 @@ namespace Optimization {
 		}
     }
 	
-
 	private: System::String ^ Vector2String(const Vector & v) {
 		String ^ ret = gcnew String("");
 		ret += "[ ";
 		for (int i = 0,j = v.dim(); i < j; ++i) {
-			ret += v[i].ToString();
+			if (v[i] == FLT_MAX) ret += "inf";
+			else if (v[i] == -FLT_MAX) ret += "-inf";
+			else ret += v[i].ToString();
+
 			if (i != j - 1) {
 				ret += " , ";
 			}
@@ -460,6 +463,8 @@ namespace Optimization {
 		ret += " ]";
 		return ret;
 	}
+
+
 	private: System::Void Input_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		PressedKey = e->KeyCode;
 	}

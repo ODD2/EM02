@@ -107,7 +107,13 @@ public:
 	string toString() {
 		string result = "f(X) = " + OriginForm + "\r\n";
 		for (auto it = FuncVar->begin(); it != FuncVar->end(); ++it) {
-			result += it->first +" = " + to_string(it->second.value) +  ", [" + to_string(it->second.l_low) + "," + to_string(it->second.l_high) + "]" + "\r\n";
+			result += it->first + " = " + to_string(it->second.value) + ", [";
+			if (it->second.l_low == -FLT_MAX) result += "-inf";
+			else result += to_string(it->second.l_low);
+			result += ",";
+			if (it->second.l_high == FLT_MAX) result += "+inf";
+			else result += to_string(it->second.l_high); 
+			result +=(string)"]" + "\r\n";
 		}
 		return result;
 	}
