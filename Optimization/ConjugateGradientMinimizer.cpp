@@ -29,6 +29,7 @@ Vector ConjugateGradientMinimizer::Find()
 			destPoint = Function.GetInitPv();
 			gradk_1 = Function.Gradient();
 			deltaGrad = gradk_1 - gradk;
+			if (length(deltaGrad) < _EPSILON)break;
 			scaler = dot(gradk_1, deltaGrad) / dot(direction, deltaGrad);
 			direction = -1 * gradk_1 + scaler * direction;
 #ifdef OD_RECORD
@@ -39,13 +40,14 @@ Vector ConjugateGradientMinimizer::Find()
 				Recorder::Record(scaler, "Beta");
 				Recorder::Record(direction, "Dir");
 				Recorder::Record(destPoint, "Dest");
+				Recorder::RecordLine("-----------------------");
 			}
 #endif
 
 			gradk = gradk_1;
 			++times;
-		} while (length(destPoint-basePoint ) > _EPSILON && times < 1000);
-		return (basePoint + destPoint) / 2;
+		} while (length(gradk_1) > _EPSILON && times < 1000 && length(destPoint - basePoint) > _EPSILON);
+		return destPoint;
 	}
 	catch (...) {
 		throw;

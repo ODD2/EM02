@@ -44,6 +44,7 @@ Vector PowellMinimizer::Find()
 			{
 				Recorder::Record(Magnitudes[i], "lambda");
 				Recorder::Record(Directions[i], "Dir");
+				Recorder::RecordLine("-----------------------");
 			}
 #endif
 		}
@@ -60,7 +61,7 @@ Vector PowellMinimizer::Find()
 double PowellMinimizer::GoldenSectionSearch( Vector & direction,  Vector & basePoint) {
 	//Find Boundaries.
 	//TODO:Error Detection , Dimension Unmach.
-	double high_bound = FLT_MAX, low_bound = -FLT_MAX;
+	double high_bound = FLT_MAX, low_bound = -FLT_MAX,value;
 	auto it = Function.FuncVar->begin();
 	double high_scale = 0, low_scale = 0;
 	for (int i = 0; i < direction.dim(); ++i,++it) {
@@ -84,13 +85,27 @@ double PowellMinimizer::GoldenSectionSearch( Vector & direction,  Vector & baseP
 		}
 	}
 
+	while(1){
+		value = Function(basePoint + low_bound * direction);
+		if (value != value) low_bound *= 0.95;
+		else break;
+	}
+	while (1) {
+		value = Function(basePoint + high_bound * direction);
+		if (value != value) high_bound *= 0.95;
+		else break;
+	}
+	
+
+
+
 	//Do Section Search Algorithm
 	double a = low_bound, b = high_bound;
 	double width = b - a;
 	double c = a + width* invGPROP, d = a+ width*GPROP;
 	Vector  loc_c = basePoint + (c * direction), loc_d = basePoint + (d * direction);
 
-	int n = int(ceil(log(_EPSILON / width) / log(GPROP)))+5;
+	int n = int(ceil(log(_EPSILON / width) / log(GPROP)))+10;
 	
 	int times = 0;
 	while (times < n) {
@@ -120,7 +135,7 @@ double GoldentSectionSearch(FunctionDef& Function,Vector & direction) {
 	//TODO:Error Detection , Dimension Unmach.
 	Vector originPoint = Function.GetInitPv();
 	Vector  basePoint = originPoint;
-	double high_bound = FLT_MAX, low_bound = -FLT_MAX;
+	double high_bound = FLT_MAX, low_bound = -FLT_MAX,value;
 	auto it = Function.FuncVar->begin();
 	double high_scale = 0, low_scale = 0;
 	for (int i = 0; i < direction.dim(); ++i, ++it) {
@@ -144,13 +159,24 @@ double GoldentSectionSearch(FunctionDef& Function,Vector & direction) {
 		}
 	}
 
+	while (1) {
+		value = Function(basePoint + low_bound * direction);
+		if (value != value) low_bound *= 0.95;
+		else break;
+	}
+	while (1) {
+		value = Function(basePoint + high_bound * direction);
+		if (value != value) high_bound *= 0.95;
+		else break;
+	}
+
 	//Do Section Search Algorithm
 	double a = low_bound, b = high_bound;
 	double width = b - a;
 	double c = a + width * invGPROP, d = a + width * GPROP;
 	Vector  loc_c = basePoint + (c * direction), loc_d = basePoint + (d * direction);
 
-	int n = int(ceil(log(_EPSILON / width) / log(GPROP)))+5;
+	int n = int(ceil(log(_EPSILON / width) / log(GPROP)))+10;
 
 	int times = 0;
 	while (times < n) {

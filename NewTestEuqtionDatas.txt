@@ -1,5 +1,5 @@
 ﻿Func x^2+x-2*x^0.5
-Limits x 0 70
+Limits x -50 70
 InitP 50
 Powell
 
@@ -14,12 +14,14 @@ InitP 50 30
 Powell
 
 // Error
+// Additional
 Func 0.001*x^3-0.07*x^2+0.06*x+0.0002*y^3-0.004*y^2+0.02*y
 Limits x -50 70 y -70 70
 InitP 50 30
 Powell
 
 // PPt Example
+// Additional
 Func 3+(x1-1.5*x2)^2+(x2-2)^2
 Limits x1 0 5 x2 0 5
 InitP 0.5 0.5
@@ -27,7 +29,7 @@ Powell
 
 
 Func x^2+x-2*x^0.5
-Limits x 0 70
+Limits x -50 70
 InitP 50
 Steep
 
@@ -36,12 +38,14 @@ Limits x -50 70 y -70 70
 InitP 50 30
 Steep
 
-//ERROR
+// ERROR
+// Additional
 Func sin⁡(3*x)+cos⁡(x)
 Limits x 0.3 3
 InitP 1
 Steep
 
+// Additional
 Func 3+(x1-1.5*x2)^2+(x2-2)^2
 Limits x1 0 5 x2 0 5
 InitP 0.5 0.5
@@ -60,29 +64,32 @@ Func 7+x^2-3*x*y+3.25*y^2-4*y
 InitP 1 -1
 Newton
 
-
-Func 7+x^2-3*x*y+3.25*y^2-4*y
-// Limits x -50 70 y -70 70
-InitP 6 5
-QNewton
-
-Func 7+x^2-3*x*y+3.25*y^2-4*y
-// Limits x -50 70 y -70 70
-InitP 50 30
-QNewton
-
 // Error
 Func x^2+x-2*x^0.5
 // Limits x 0 70
 InitP 7
 QNewton
 
+
+Func 7+x^2-3*x*y+3.25*y^2-4*y
+// Limits x -50 70 y -70 70
+InitP 6 5
+QNewton
+
+// Additional
+Func 7+x^2-3*x*y+3.25*y^2-4*y
+// Limits x -50 70 y -70 70
+InitP 50 30
+QNewton
+
+
+
 // Error
+// Additional
 Func 0.001*x^3-0.07*x^2+0.06*x+0.0002*y^3-0.004*y^2+0.02*y
 InitP 50 30
 QNewton
 
-Func sin⁡(3*x^2-3)^2+cos⁡(x)^2%2
 
 Func x^2+x-2*x^0.5
 Limits x 0 70

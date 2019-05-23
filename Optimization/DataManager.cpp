@@ -22,7 +22,8 @@ bool DataManager::LoadEquationData()
 	{
 		//定義讀取檔案字串暫存變數
 		std::string tempSring;
-
+		Equations.clear();
+		EquationIndex = 0;
 		//執行讀檔迴圈，並在讀到檔案結尾時結束
 		while (!fin.eof())
 		{
@@ -32,7 +33,6 @@ bool DataManager::LoadEquationData()
 			Equations.push_back(tempSring);
 			//遞增EquationIndex，標記到當前讀取向量ID
 			EquationIndex++;
-
 		}
 		return true;
 	}

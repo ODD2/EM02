@@ -69,8 +69,11 @@ namespace Optimization {
 	private: System::Windows::Forms::TabPage^  tabPage2;
 
 	private: System::Windows::Forms::TextBox^  Process;
+	private: System::Windows::Forms::TabPage^  tabPage3;
+	private: System::Windows::Forms::TextBox^  Functions;
 
-			 FunctionDef * Function;
+
+			 FunctionDef * Function = new FunctionDef();
 		/// 清除任何使用中的資源。
 		/// </summary>
 		~MyForm()
@@ -111,6 +114,8 @@ namespace Optimization {
 			this->tabPage1 = (gcnew System::Windows::Forms::TabPage());
 			this->tabPage2 = (gcnew System::Windows::Forms::TabPage());
 			this->Process = (gcnew System::Windows::Forms::TextBox());
+			this->tabPage3 = (gcnew System::Windows::Forms::TabPage());
+			this->Functions = (gcnew System::Windows::Forms::TextBox());
 			this->panel1->SuspendLayout();
 			this->menuStrip1->SuspendLayout();
 			this->panel2->SuspendLayout();
@@ -118,6 +123,7 @@ namespace Optimization {
 			this->tabControl1->SuspendLayout();
 			this->tabPage1->SuspendLayout();
 			this->tabPage2->SuspendLayout();
+			this->tabPage3->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// panel1
@@ -157,6 +163,12 @@ namespace Optimization {
 			// 
 			// Input
 			// 
+			this->Input->AutoCompleteCustomSource->AddRange(gcnew cli::array< System::String^  >(8) {
+				L"Func", L"InitP", L"Limits", L"Powell",
+					L"Steep", L"Newton", L"QNewton", L"Conjugate"
+			});
+			this->Input->AutoCompleteMode = System::Windows::Forms::AutoCompleteMode::Append;
+			this->Input->AutoCompleteSource = System::Windows::Forms::AutoCompleteSource::CustomSource;
 			this->Input->Location = System::Drawing::Point(14, 19);
 			this->Input->Multiline = true;
 			this->Input->Name = L"Input";
@@ -226,11 +238,13 @@ namespace Optimization {
 			// openFileDialog1
 			// 
 			this->openFileDialog1->FileName = L"openFileDialog1";
+			this->openFileDialog1->FileOk += gcnew System::ComponentModel::CancelEventHandler(this, &MyForm::openFileDialog1_FileOk);
 			// 
 			// tabControl1
 			// 
 			this->tabControl1->Controls->Add(this->tabPage1);
 			this->tabControl1->Controls->Add(this->tabPage2);
+			this->tabControl1->Controls->Add(this->tabPage3);
 			this->tabControl1->Location = System::Drawing::Point(12, 36);
 			this->tabControl1->Name = L"tabControl1";
 			this->tabControl1->SelectedIndex = 0;
@@ -269,6 +283,25 @@ namespace Optimization {
 			this->Process->Size = System::Drawing::Size(506, 688);
 			this->Process->TabIndex = 1;
 			// 
+			// tabPage3
+			// 
+			this->tabPage3->Controls->Add(this->Functions);
+			this->tabPage3->Location = System::Drawing::Point(4, 25);
+			this->tabPage3->Name = L"tabPage3";
+			this->tabPage3->Size = System::Drawing::Size(502, 684);
+			this->tabPage3->TabIndex = 0;
+			this->tabPage3->Text = L"Functions";
+			// 
+			// Functions
+			// 
+			this->Functions->Location = System::Drawing::Point(-2, 0);
+			this->Functions->Multiline = true;
+			this->Functions->Name = L"Functions";
+			this->Functions->ReadOnly = true;
+			this->Functions->ScrollBars = System::Windows::Forms::ScrollBars::Both;
+			this->Functions->Size = System::Drawing::Size(506, 688);
+			this->Functions->TabIndex = 2;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
@@ -295,6 +328,8 @@ namespace Optimization {
 			this->tabPage1->PerformLayout();
 			this->tabPage2->ResumeLayout(false);
 			this->tabPage2->PerformLayout();
+			this->tabPage3->ResumeLayout(false);
+			this->tabPage3->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -319,11 +354,11 @@ namespace Optimization {
 	if (dataManager->LoadEquationData())
 	{
 		std::vector<std::string> equations = dataManager->GetEquations();
-		Output->Multiline = true;
+		Functions->Text = "";
 		for (unsigned int i = 0; i < equations.size(); i++)
 		{
-			Output->Text += gcnew String(equations[i].c_str());
-			Output->Text += Environment::NewLine;
+			Functions->Text += "("+ i.ToString() + ") " + gcnew String(equations[i].c_str());
+			Functions->Text += Environment::NewLine;
 		}
 	}
 }
@@ -334,113 +369,147 @@ namespace Optimization {
 			cli::array<System::String^>^ userCommand = Input->Text->Split(deli, System::StringSplitOptions::None);
 			for (int i = 0; i < userCommand->Length - 1 ; ++i) {
 				cli::array<System::String^>^ CmdBlock = userCommand[i]->Split(' ');
-				if (CmdBlock[0] == "Func"){
-					//Create input stream
-					std::stringstream test(context->marshal_as<const char *>(CmdBlock[1]));
+				try {
+					if (CmdBlock[0] == "Func") {
+						//Create input stream
 
-					//give input stream to flex analyser
-					FlexLexer* lexer = new yyFlexLexer(&test, 0);
+						string originFmu;
+						if (CmdBlock[1][0] == '$') {
+							int index = Convert::ToInt32(CmdBlock[1]->Substring(1));
+							if (index < dataManager->EquationIndex) {
+								originFmu = dataManager->GetEquations()[index];
+							}
+							else {
+								History->AppendText("Index out of range\r\n");
+								continue;
+							}
+						}
+						else {
+							originFmu = context->marshal_as<const char *>(CmdBlock[1]);
+						}
 
-					delete Function;
-					Function = new FunctionDef();
-					//Save Original Function Form
-					Function->OriginForm = context->marshal_as<const char *>(CmdBlock[1]);
-					//Attach For Use.
-					WorkVec = Function->GetFmu();
-					VarTable = Function->GetVar();
-					//Reset formula dependencies
-					WorkVec->clear();
-					VarTable->clear();
+						std::stringstream test(originFmu);
 
-					//Working 
-					while (lexer->yylex() != 0);
-					//TODO: Error Detection.
 
-					//Detach For Safety.
-					WorkVec = NULL;
-					VarTable = NULL;
 
-					//Converting
-					Infix2Postfix(*(Function->GetFmu()));
 
-					Function->CreateTokenLink();
+						//give input stream to flex analyser
+						FlexLexer* lexer = new yyFlexLexer(&test, 0);
+
+						delete Function;
+						Function = new FunctionDef();
+						//Save Original Function Form
+						Function->OriginForm = originFmu;
+						//Attach For Use.
+						WorkVec = Function->GetFmu();
+						VarTable = Function->GetVar();
+						//Reset formula dependencies
+						WorkVec->clear();
+						VarTable->clear();
+
+						//Working 
+						while (lexer->yylex() != 0);
+						//TODO: Error Detection.
+
+						//Detach For Safety.
+						WorkVec = NULL;
+						VarTable = NULL;
+
+						//Converting
+						Infix2Postfix(*(Function->GetFmu()));
+
+						Function->CreateTokenLink();
 #ifdef OD_PRINT_PROCESS
-					cout << Function->CalcFuncWithVar();
+						cout << Function->CalcFuncWithVar();
 #endif
-					Output->Text =gcnew String(Function->toString().c_str());
-				}
-				else if (CmdBlock[0] == "InitP") {
-					vector<double> Values;
-					//TODO:Error Detection , Dimension Insufficient
-					for (int i = 1; i < CmdBlock->Length; ++i) {
-						
-						Values.push_back(Convert::ToDouble(CmdBlock[i]));
+						Output->Text = gcnew String(Function->toString().c_str());
 					}
-					Function->setVariables(Values);
+					else if (CmdBlock[0] == "InitP") {
+						vector<double> Values;
+						//TODO:Error Detection , Dimension Insufficient
+						for (int i = 1; i < CmdBlock->Length; ++i) {
+							Values.push_back(Convert::ToDouble(CmdBlock[i]));
+						}
+						Function->setVariables(Values);
 #ifdef OD_PRINT_PROCESS
-					cout << Function->CalcFuncWithVar();
+						cout << Function->CalcFuncWithVar();
 #endif
-					Output->Text = gcnew String(Function->toString().c_str());
-				}
-				else if (CmdBlock[0] == "Limits") {
-					map<string,std::pair<double,double>> Values;
-					//TODO:Error Detection , Dimension Insufficient
-					for (int i = 1; i < CmdBlock->Length; i+=3) {
-						string var = context->marshal_as<string>(CmdBlock[i]);
-						double low = Convert::ToDouble(CmdBlock[i + 1]);
-						double high = Convert::ToDouble(CmdBlock[i + 2]);
-						Values[var] = { low,high };
+						Output->Text = gcnew String(Function->toString().c_str());
 					}
-					Function->setLimits(Values);
-					Output->Text = gcnew String(Function->toString().c_str());
+					else if (CmdBlock[0] == "Limits") {
+						map<string, std::pair<double, double>> Values;
+						//TODO:Error Detection , Dimension Insufficient
+						auto varList = Function->FuncVar;
+						for (int i = 1; i < CmdBlock->Length; i += 3) {
+							string var = context->marshal_as<string>(CmdBlock[i]);
+							double low = Convert::ToDouble(CmdBlock[i + 1]);
+							double high = Convert::ToDouble(CmdBlock[i + 2]);
+							if (low > high) {
+								swap(low, high);
+							}
+							if (varList->count(var) == 0) {
+								String ^ msg = gcnew String(var.c_str());
+								msg += " variable not exist" + Environment::NewLine;
+								History->AppendText(msg);
+							}
+							else Values[var] = { low,high };
+						}
+						Function->setLimits(Values);
+						Output->Text = gcnew String(Function->toString().c_str());
+					}
+					else if (CmdBlock[0] == "Powell") {
+						PowellMinimizer Pm(Function);
+						Vector Point = Pm.Find();
+						Output->Text += Vector2String(Point) + "\r\n";
+						Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+						Process->Text = gcnew String(Recorder::Record());
+						Recorder::Clear();
+					}
+					else if (CmdBlock[0] == "Steep") {
+						SteepestMinimizer Sm(Function);
+						Vector Point = Sm.Find();
+						Output->Text += Vector2String(Point) + "\r\n";
+						Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+						Process->Text = gcnew String(Recorder::Record());
+						Recorder::Clear();
+					}
+					else if (CmdBlock[0] == "Test") {
+						Output->Text += Vector2String((*Function).Gradient()) + "\r\n";
+					}
+					else if (CmdBlock[0] == "Newton") {
+						NewtonMinimizer Nm(Function);
+						Vector Point = Nm.Find();
+						Output->Text += Vector2String(Point) + "\r\n";
+						Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+						Process->Text = gcnew String(Recorder::Record());
+						Recorder::Clear();
+					}
+					else if (CmdBlock[0] == "QNewton") {
+						QuasiNewtonMinimizer QNm(Function);
+						Vector Point = QNm.Find();
+						Output->Text += Vector2String(Point) + "\r\n";
+						Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+						Process->Text = gcnew String(Recorder::Record());
+						Recorder::Clear();
+					}
+					else if (CmdBlock[0] == "Conjugate") {
+						ConjugateGradientMinimizer CGm(Function);
+						Vector Point = CGm.Find();
+						Output->Text += Vector2String(Point) + "\r\n";
+						Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
+						Process->Text = gcnew String(Recorder::Record());
+						Recorder::Clear();
+					}
+					else if (CmdBlock[0] == "//");
+					else {
+						History->AppendText("No Such Command!!\r\n");
+					}
 				}
-				else if (CmdBlock[0] == "Powell") {
-					PowellMinimizer Pm(Function);
-					Vector Point =  Pm.Find();
-					Output->Text += Vector2String(Point)+"\r\n";
-					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
-					Process->Text = gcnew String(Recorder::Record());
-					Recorder::Clear();
+				catch (std::exception&  e) {
+					String ^ str = gcnew String(e.what());
+					History->AppendText( str + Environment::NewLine);
 				}
-				else if (CmdBlock[0] == "Steep") {
-					SteepestMinimizer Sm(Function);
-					Vector Point = Sm.Find();
-					Output->Text += Vector2String(Point) + "\r\n";
-					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
-					Process->Text = gcnew String(Recorder::Record());
-					Recorder::Clear();
-				}
-				else if (CmdBlock[0] == "Test") {
-					Output->Text += Vector2String((*Function).Gradient()) + "\r\n";
-				}
-				else if (CmdBlock[0] == "Newton") {
-					NewtonMinimizer Nm(Function);
-					Vector Point = Nm.Find();
-					Output->Text += Vector2String(Point) + "\r\n";
-					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
-					Process->Text = gcnew String(Recorder::Record());
-					Recorder::Clear();
-				}
-				else if (CmdBlock[0] == "QNewton") {
-					QuasiNewtonMinimizer QNm(Function);
-					Vector Point = QNm.Find();
-					Output->Text += Vector2String(Point) + "\r\n";
-					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
-					Process->Text = gcnew String(Recorder::Record());
-					Recorder::Clear();
-				}
-				else if (CmdBlock[0] == "Conjugate") {
-					ConjugateGradientMinimizer CGm(Function);
-					Vector Point = CGm.Find();
-					Output->Text += Vector2String(Point) + "\r\n";
-					Output->Text += "f(X) = " + (*Function)(Point.Data).ToString() + "\r\n";
-					Process->Text = gcnew String(Recorder::Record());
-					Recorder::Clear();
-				}
-				else if (CmdBlock[0] == "//");
-				else {
-					History->AppendText("No Such Command!!\r\n");
-				}
+
 			}
 			//Record Into History.
 			History->AppendText(Input->Text);

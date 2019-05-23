@@ -361,7 +361,7 @@ Matrix operator+(const Matrix & l, const Matrix & r)
 }
 Matrix operator-(const Matrix & l, const Matrix & r)
 {
-	return Matrix();
+	return subm(l, r);
 }
 Matrix operator/(const Matrix & l, double r)
 {

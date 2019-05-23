@@ -17,7 +17,7 @@ Vector QuasiNewtonMinimizer::Find()
 		Vector direction, move, deltaPoint, deltaGradient;
 		Vector gradient1, gradient2;
 		Matrix QuasiHeiss = Matrix::Identity(numArgs);
-		Matrix GradM, PointM,TempM;
+		Matrix GradM, PointM,TempM,Hassien;
 
 		gradient2 = Function.Gradient();
 		double value, lambda;
@@ -26,11 +26,24 @@ Vector QuasiNewtonMinimizer::Find()
 		{
 			basePoint = destPoint;
 			gradient1 = gradient2;
-
 			direction = -1 * multm(QuasiHeiss, gradient1);
-			lambda = GoldentSectionSearch(Function, direction);
+			//lambda = GoldentSectionSearch(Function, direction);
+			
+			lambda = dot(-1*gradient1, direction) / dot(direction, multm(Function.Heissen(), direction));
 
-			Function.setVariables(basePoint + lambda * direction);
+
+
+
+			value = Function(basePoint + lambda * direction);
+
+			while (value != value) {
+				Recorder::RecordLine("Function Reach NaN! limiting lambda.");
+				lambda *= 0.9;
+				value = Function(basePoint + lambda * direction);
+			}
+
+
+
 			destPoint = Function.GetInitPv();
 
 			gradient2 = Function.Gradient();
@@ -44,22 +57,21 @@ Vector QuasiNewtonMinimizer::Find()
 			double scaler1 = dot(deltaPoint, deltaGradient), 
 						scaler2 = dot(deltaGradient,Matrix::getVector(TempM,0)) ;
 
-			QuasiHeiss = QuasiHeiss + (PointM * transpose(PointM)) / scaler1 + (TempM*transpose(TempM)) / scaler2;
+			QuasiHeiss = QuasiHeiss + (PointM * transpose(PointM)) / scaler1 - (TempM*transpose(TempM)) / scaler2;
  
 
-			move = Matrix::getVector(solve0(Function.Heissen(), -1 * Function.Gradient()), 0);
-			value = Function(destPoint + move);
-			destPoint = Function.GetInitPv();
 #ifdef OD_RECORD
 			{
 				Recorder::Record(times, "Times");
 				Recorder::Record(QuasiHeiss, "QuasiHess");
+				Recorder::Record(Function.Heissen(), "Hassien");
 				Recorder::Record(destPoint, "Dest");
+				Recorder::RecordLine("-----------------------");
 			}
 #endif
 			++times;
-		} while (length(basePoint - destPoint) > _EPSILON && times< 1000);
-		return (basePoint + destPoint) / 2;
+		} while (length(gradient2)> _EPSILON && times < 1000); //while (length(basePoint - destPoint) > _EPSILON && times< 1000);
+		return destPoint;
 	}
 	catch (...) {
 		throw;
