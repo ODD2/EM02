@@ -233,7 +233,6 @@ namespace Optimization {
 			this->History->ScrollBars = System::Windows::Forms::ScrollBars::Both;
 			this->History->Size = System::Drawing::Size(506, 688);
 			this->History->TabIndex = 1;
-			this->History->Text = L" ";
 			// 
 			// openFileDialog1
 			// 
@@ -427,14 +426,20 @@ namespace Optimization {
 					else if (CmdBlock[0] == "InitP") {
 						vector<double> Values;
 						//TODO:Error Detection , Dimension Insufficient
-						for (int i = 1; i < CmdBlock->Length; ++i) {
-							Values.push_back(Convert::ToDouble(CmdBlock[i]));
+						if (CmdBlock->Length - 1 != Function->FuncVar->size())
+						{
+							History->AppendText("Error!! Numbers of variable unmatch!" + Environment::NewLine);
 						}
-						Function->setVariables(Values);
+						else {
+							for (int i = 1; i < CmdBlock->Length; ++i) {
+								Values.push_back(Convert::ToDouble(CmdBlock[i]));
+							}
+							Function->setVariables(Values);
 #ifdef OD_PRINT_PROCESS
-						cout << Function->CalcFuncWithVar();
+							cout << Function->CalcFuncWithVar();
 #endif
-						Output->Text = gcnew String(Function->toString().c_str());
+							Output->Text = gcnew String(Function->toString().c_str());
+						}
 					}
 					else if (CmdBlock[0] == "Limits") {
 						map<string, std::pair<double, double>> Values;

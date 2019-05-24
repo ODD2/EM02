@@ -73,6 +73,7 @@ public:
 			++index;
 		}
 	}
+
 	void setVariables(Vector& args) {
 		try
 		{
@@ -83,6 +84,27 @@ public:
 			throw;
 		}
 	}
+
+	//Disables Boundary detection and adjustments! use with caution!!!
+	void fsetVariables(vector<double>& args) {
+		int index = 0;
+		for (auto it = FuncVar->begin(); it != FuncVar->end(); ++it) {
+				it->second.value = args[index];
+				++index;
+		}
+	}
+	//Disables Boundary detection and adjustments! use with caution!!!
+	void fsetVariables(Vector& args) {
+		try
+		{
+			fsetVariables(args.Data);
+		}
+		catch (...)
+		{
+			throw;
+		}
+	}
+
 	double setLimits(map<string,pair<double,double>>& limits) {
 		for (auto it = limits.begin(); it != limits.end(); ++it) {
 			if (FuncVar->count(it->first) == 0) {
@@ -259,6 +281,7 @@ public: double CalcFuncWithVar() {
 
 		return Cur->container.value;
 	}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 public: 
 	Vector Gradient(Vector args)

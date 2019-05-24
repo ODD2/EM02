@@ -175,13 +175,15 @@ double GoldentSectionSearch(FunctionDef& Function,Vector & direction) {
 	double width = b - a;
 	double c = a + width * invGPROP, d = a + width * GPROP;
 	Vector  loc_c = basePoint + (c * direction), loc_d = basePoint + (d * direction);
+	Vector loc_a = basePoint + a * direction, loc_b = basePoint + b * direction;
 
 	int n = int(ceil(log(_EPSILON / width) / log(GPROP)))+10;
-
+	double savea, saveb, savec, saved;
 	int times = 0;
 	while (times < n) {
 		width *= GPROP;
-		if (Function(loc_c.Data) > Function(loc_d.Data)) {
+		savea = Function(loc_a), saveb = Function(loc_b), savec = Function(loc_c), saved = Function(loc_d);
+		if (savec > saved ) {
 			a = c;
 			c = d;
 			d = a + GPROP * width;
